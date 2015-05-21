@@ -205,7 +205,6 @@ namespace RCRunner
             if (_totRunningTestScripts > 0 || _totWaitingTestScripts > 0) return;
 
             DisableOrEnableControls(true);
-            _testFrameworkRunner.CleanUpDirectories();
         }
 
         private static string CreateTestResultsFolder()

@@ -43,10 +43,6 @@ namespace RCRunner
         /// <returns>The name of the attribute that defines a test method</returns>
         string GetTestMethodAttribute();
         /// <summary>
-        /// Cleans up all folder directories in the TestResults folder
-        /// </summary>
-        void CleanUpDirectories();
-        /// <summary>
         /// Returns the name of the attribute that defines a description for a test method
         /// </summary>
         /// <returns>The name of the attribute that defines description for a test method</returns>
@@ -117,40 +113,47 @@ namespace RCRunner
             if (!File.Exists(_assemblyPath)) throw new FileNotFoundException("Test Assembly not found on the specified path", _assemblyPath);
             var testContainer = "/testcontainer:" + "\"" + _assemblyPath + "\"";
             var testParam = "/test:" + testCase;
-            var resultFile = Path.Combine(_resultFilePath, testCase + ".trx");
+            var resultFilePath = Path.Combine(_resultFilePath, testCase);
+            Directory.CreateDirectory(resultFilePath);
+            var resultFile = Path.Combine(resultFilePath, testCase + ".trx");
             File.Delete(resultFile);
             var resultParam = "/resultsfile:" + "\"" + resultFile + "\"";
-
-            var p = new Process
+            try
             {
-                StartInfo =
+                var p = new Process
                 {
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    FileName = msTestPath,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    Arguments = testContainer + " " + testParam + " " + resultParam
+                    StartInfo =
+                    {
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        FileName = msTestPath,
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        Arguments = testContainer + " " + testParam + " " + resultParam
+                    }
+                };
+
+                if (!p.Start())
+                {
+                    throw new Exception("Error starting the MSTest process", new Exception(p.StandardError.ReadToEnd()));
                 }
-            };
 
-            if (!p.Start())
-            {
-                throw new Exception("Error starting the MSTest process", new Exception(p.StandardError.ReadToEnd()));
+                p.WaitForExit();
+
+                var errorMsg = "";
+
+                var testResult = GetTestStatusFromTrxFile(resultFile, ref errorMsg);
+
+                if (!testResult)
+                {
+                    throw new Exception(errorMsg);
+                }
             }
-
-            p.WaitForExit();
-
-            var errorMsg = "";
-
-            var testResult = GetTestStatusFromTrxFile(resultFile, ref errorMsg);
-
-            if (!testResult)
+            finally
             {
-                throw new Exception(errorMsg);
+                CleanUpDirectories(resultFilePath);
             }
-
         }
 
         /// <summary>
@@ -185,15 +188,24 @@ namespace RCRunner
         /// <summary>
         /// Cleans up all folder directories in the TestResults folder
         /// </summary>
-        public void CleanUpDirectories()
+        public void CleanUpDirectories(string resultFilePath)
         {
-            //var filePaths = Directory.GetDirectories(_resultFilePath);
+            try
+            {
+                var filePaths = Directory.GetDirectories(resultFilePath);
 
-            //foreach (var folder in filePaths)
-            //{
-            //    CleanDirectory(new DirectoryInfo(folder));
-            //    Directory.Delete(folder);
-            //}
+                foreach (var folder in filePaths)
+                {
+                    CleanDirectory(new DirectoryInfo(folder));
+                    Directory.Delete(folder);
+                }
+
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch
+            {
+                
+            }
         }
 
         /// <summary>
@@ -205,7 +217,6 @@ namespace RCRunner
             return typeof (DescriptionAttribute).FullName;
         }
 
-/*
         /// <summary>
         /// Cleans a single directory content
         /// </summary>
@@ -221,7 +232,6 @@ namespace RCRunner
                 subDirectory.Delete(true);
             }
         }
-*/
 
     }
 }
