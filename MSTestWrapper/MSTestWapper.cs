@@ -2,54 +2,15 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RCRunner;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
-namespace RCRunner
+namespace MSTestWrapper
 {
-    /// <summary>
-    /// Defines an Interface to comunicate with different test frameworks, such as mstest, nunit, etc
-    /// </summary>
-    public interface ITestFrameworkRunner
-    {
-        /// <summary>
-        /// Executes a test case specified by the testcase param
-        /// </summary>
-        /// <param name="testCase">The test case to run</param>
-        void RunTest(string testCase);
-        /// <summary>
-        /// Returns the assembly that contains the test cases to run
-        /// </summary>
-        /// <returns>Returns the assembly path</returns>
-        string GetAssemblyPath();
-        /// <summary>
-        /// Sets the assembly that contains the test cases to run
-        /// </summary>
-        /// <param name="assemblyPath">The assembly that contains the test cases to run</param>
-        void SetAssemblyPath(string assemblyPath);
-        /// <summary>
-        /// Retuns the folder which the tests results will be stored
-        /// </summary>
-        /// <returns>The folder which the tests results will be stored</returns>
-        string GetTestResultsFolder();
-        /// <summary>
-        /// Sets the folder which the tests results will be stored
-        /// </summary>
-        /// <param name="folder">The folder which the tests results will be stored</param>
-        void SetTestResultsFolder(string folder);
-        /// <summary>
-        /// Returns the name of the attribute that defines a test method
-        /// </summary>
-        /// <returns>The name of the attribute that defines a test method</returns>
-        string GetTestMethodAttribute();
-        /// <summary>
-        /// Returns the name of the attribute that defines a description for a test method
-        /// </summary>
-        /// <returns>The name of the attribute that defines description for a test method</returns>
-        string GetTestMethodDescriptionAttribute();
-    }
-
-    /// <summary>
+   /// <summary>
     /// A test wrapper that implements the ITestFrameworkRunner as an adapter for the MSTest test framework
     /// </summary>
     public class MSTestWrapper : ITestFrameworkRunner
@@ -102,22 +63,58 @@ namespace RCRunner
             return typeof(TestMethodAttribute).FullName;
         }
 
+       /// <summary>
+       /// Deletes a file wating in case that it is being used by other applications
+       /// </summary>
+       /// <param name="file"></param>
+        private static void SafeDeleteFile(string file)
+       {
+           try
+           {
+               File.Delete(file); 
+           }
+           catch (Exception)
+           {
+               GC.Collect();
+               GC.WaitForPendingFinalizers();
+               Thread.Sleep(2000);
+               File.Delete(file);
+           }
+       }
+
         /// <summary>
-        /// Executes a test case specified by the testcase param
+        /// Check if the error message returned by the test case is a timeout error
         /// </summary>
-        /// <param name="testCase">The test case to run</param>
-        public void RunTest(string testCase)
+        /// <param name="testCase">The test cases to run</param>
+        /// <param name="errorMsg">The error message</param>
+        /// <returns></returns>
+        private bool InternalRunTest(string testCase, ref string errorMsg)
         {
-            var msTestPath = Properties.Settings.Default.MSTestExeLocation;
-            if (!File.Exists(msTestPath)) throw new FileNotFoundException("MSTest app not found on the specified path", msTestPath);
-            if (!File.Exists(_assemblyPath)) throw new FileNotFoundException("Test Assembly not found on the specified path", _assemblyPath);
-            var testContainer = "/testcontainer:" + "\"" + _assemblyPath + "\"";
-            var testParam = "/test:" + testCase;
             var resultFilePath = Path.Combine(_resultFilePath, testCase);
             Directory.CreateDirectory(resultFilePath);
+
             var resultFile = Path.Combine(resultFilePath, testCase + ".trx");
-            File.Delete(resultFile);
+
+            if (File.Exists(resultFile))
+            {
+                resultFile = Path.Combine(resultFilePath, testCase + "(2)" + ".trx");
+            }
+            
+            var msTestPath = Settings.Default.MSTestExeLocation;
+
+            if (!File.Exists(msTestPath))
+                throw new FileNotFoundException("MSTest app not found on the specified path", msTestPath);
+
+            if (!File.Exists(_assemblyPath))
+                throw new FileNotFoundException("Test Assembly not found on the specified path", _assemblyPath);
+
+            var testContainer = "/testcontainer:" + "\"" + _assemblyPath + "\"";
+            var testParam = "/test:" + testCase;
+
             var resultParam = "/resultsfile:" + "\"" + resultFile + "\"";
+
+            SafeDeleteFile(resultFile);
+
             try
             {
                 var p = new Process
@@ -141,19 +138,44 @@ namespace RCRunner
 
                 p.WaitForExit();
 
-                var errorMsg = "";
-
                 var testResult = GetTestStatusFromTrxFile(resultFile, ref errorMsg);
 
-                if (!testResult)
-                {
-                    throw new Exception(errorMsg);
-                }
+                return testResult;
             }
+
             finally
             {
                 CleanUpDirectories(resultFilePath);
             }
+        }
+
+        /// <summary>
+        /// Check if the error message returned by the test case is a timeout error
+        /// </summary>
+        /// <param name="errorMsg">The error message</param>
+        /// <returns></returns>
+        private static bool IsTimeOutError(string errorMsg)
+        {
+            return errorMsg.ToLower().Contains("timed out after");
+        }
+
+        /// <summary>
+        /// Executes a test case specified by the testcase param
+        /// </summary>
+        /// <param name="testCase">The test case to run</param>
+        public void RunTest(string testCase)
+        {
+            var errorMsg = string.Empty;
+
+            var testResult = InternalRunTest(testCase, ref errorMsg);
+
+            if (testResult) return;
+
+            if (!IsTimeOutError(errorMsg)) throw new Exception(errorMsg);
+
+            testResult = InternalRunTest(testCase, ref errorMsg);
+
+            if (!testResult) throw new Exception(errorMsg);
         }
 
         /// <summary>
@@ -204,7 +226,7 @@ namespace RCRunner
             // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
-                
+
             }
         }
 
@@ -214,7 +236,16 @@ namespace RCRunner
         /// <returns>The name of the attribute that defines description for a test method</returns>
         public string GetTestMethodDescriptionAttribute()
         {
-            return typeof (DescriptionAttribute).FullName;
+            return typeof(DescriptionAttribute).FullName;
+        }
+
+        /// <summary>
+        /// Returns the name of the test runner
+        /// </summary>
+        /// <returns></returns>
+        public string GetDisplayName()
+        {
+            return "MSTest";
         }
 
         /// <summary>

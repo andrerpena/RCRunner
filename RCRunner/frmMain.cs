@@ -9,32 +9,36 @@ using System.Windows.Forms;
 
 namespace RCRunner
 {
-    public partial class Form1 : Form
+    public partial class FrmMain : Form
     {
         private readonly RCRunnerAPI _rcRunner;
         private delegate void SetTextCallback(TestMethod testcaseMethod);
         private delegate void SetEnabledCallback(bool enabled);
+
+        private PluginLoader _pluginLoader;
 
         private readonly Color _testActive = Color.FloralWhite;
         private readonly Color _testFailed = Color.Red;
         private readonly Color _testPassed = Color.GreenYellow;
         private readonly Color _testRunning = Color.Blue;
         private readonly Color _testWaiting = Color.DarkOrange;
-        private readonly ITestFrameworkRunner _testFrameworkRunner;
+        private ITestFrameworkRunner _testFrameworkRunner;
         private int _totFailedTestScripts;
         private int _totPassedTestScripts;
         private int _totRunningTestScripts;
         private int _totWaitingTestScripts;
 
-        public Form1()
+        public FrmMain()
         {
             InitializeComponent();
 
-            _testFrameworkRunner = new MSTestWrapper();
+            LoadTestRunners();
 
-            _rcRunner = new RCRunnerAPI(_testFrameworkRunner);
+            _rcRunner = new RCRunnerAPI();
             _rcRunner.OnTestFinished += OnTaskFinishedEvent;
             _rcRunner.MethodStatusChanged += OnMethodStatusChanged;
+
+            trvTestCases.CheckBoxes = true;
 
             lblFailedScripts.ForeColor = _testFailed;
             lblPassedScripts.ForeColor = _testPassed;
@@ -44,6 +48,22 @@ namespace RCRunner
             ResetTestExecution();
 
             DisableOrEnableControls(true);
+        }
+
+        private void LoadTestRunners()
+        {
+            _pluginLoader = new PluginLoader();
+            _pluginLoader.LoadTestRunnersPlugins();
+
+            foreach (var testFrameworkRunner in _pluginLoader.TestRunnersPluginList)
+            {
+                cmbTestRunners.Items.Add(testFrameworkRunner.GetDisplayName());
+            }
+
+            if (cmbTestRunners.Items.Count <= 0) return;
+
+            cmbTestRunners.SelectedIndex = 0;
+            _testFrameworkRunner = _pluginLoader.TestRunnersPluginList[0];
         }
 
         private void ResetTestExecution()
@@ -92,9 +112,6 @@ namespace RCRunner
                     node.ForeColor = _testWaiting;
                     break;
             }
-
-            
-
         }
 
         private TreeNode FindNodebyTest(TestMethod testcaseMethod)
@@ -103,12 +120,10 @@ namespace RCRunner
 
             foreach (TreeNode node in trvTestCases.Nodes)
             {
-                foreach (TreeNode child in node.Nodes)
+                foreach (var child in node.Nodes.Cast<TreeNode>().Where(child => child.Tag == testcaseMethod))
                 {
-                    if (child.Tag == testcaseMethod)
-                    {
-                        nodeFound = child;
-                    }
+                    nodeFound = child;
+                    break;
                 }
             }
             return nodeFound;
@@ -116,17 +131,7 @@ namespace RCRunner
 
         private TreeNode FindNodebyClassName(TestMethod testcaseMethod)
         {
-            TreeNode nodeFound = null;
-
-            foreach (TreeNode node in trvTestCases.Nodes)
-            {
-                if (node.Text.Equals(testcaseMethod.ClassName))
-                {
-                    nodeFound = node;
-                }
-                
-            }
-            return nodeFound;
+            return trvTestCases.Nodes.Cast<TreeNode>().FirstOrDefault(node => node.Text.Equals(testcaseMethod.ClassName));
         }
 
         private void OnMethodStatusChanged(TestMethod testcasemethod)
@@ -197,7 +202,7 @@ namespace RCRunner
 
             if (status == TestExecutionStatus.Failed) _totFailedTestScripts++;
             if (status == TestExecutionStatus.Passed) _totPassedTestScripts++;
-            
+
             if (status == TestExecutionStatus.Waiting) _totWaitingTestScripts++;
 
             UpdateLblTestScripts(testcaseMethod);
@@ -251,16 +256,35 @@ namespace RCRunner
             txtbxTestError.Text = testMethod.LastExecutionErrorMsg;
         }
 
+        private void LoadTreeView(IEnumerable<TestMethod> testClassesList)
+        {
+            trvTestCases.BeginUpdate();
+            trvTestCases.Nodes.Clear();
+            try
+            {
+                foreach (var testMethod in testClassesList)
+                {
+                    var classNode = FindNodebyClassName(testMethod) ?? trvTestCases.Nodes.Add(testMethod.ClassName);
+                    var methodNode = classNode.Nodes.Add(testMethod.Method.Name);
+                    methodNode.Tag = testMethod;
+                    PaintTreeNodeBasedOnTestStatus(testMethod, methodNode);
+                }
+            }
+            finally
+            {
+                trvTestCases.EndUpdate();  
+            }
+        }
+
         private void lblLoadAssembly_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ResetTestExecution();
             DisableOrEnableControls(false);
             try
             {
-                trvTestCases.Nodes.Clear();
-                trvTestCases.CheckBoxes = true;
+                cmbxFilter.SelectedIndex = 0;
 
-                var fileDialog = new OpenFileDialog {DefaultExt = ".dll", CheckFileExists = true, Multiselect = false};
+                var fileDialog = new OpenFileDialog { DefaultExt = ".dll", CheckFileExists = true, Multiselect = false };
 
                 var foundAssembly = fileDialog.ShowDialog();
 
@@ -270,23 +294,11 @@ namespace RCRunner
 
                 _testFrameworkRunner.SetAssemblyPath(assemblyFile);
 
+                _rcRunner.SetTestRunner(_testFrameworkRunner);
+
                 _rcRunner.LoadAssembly();
 
-
-                foreach (var testMethod in _rcRunner.TestClassesList)
-                {
-                    var classNode = FindNodebyClassName(testMethod);
-
-                    if (classNode == null)
-                    {
-                        classNode = trvTestCases.Nodes.Add(testMethod.ClassName);    
-                    }
-                    
-                    var methodNode = classNode.Nodes.Add(testMethod.Method.Name);
-                    methodNode.Tag = testMethod;
-                    PaintTreeNodeBasedOnTestStatus(testMethod, methodNode);
-
-                }
+                LoadTreeView(_rcRunner.TestClassesList);
             }
             finally
             {
@@ -297,7 +309,7 @@ namespace RCRunner
         private static int TreeviewCountCheckedNodes(IEnumerable treeNodeCollection)
         {
             var countchecked = 0;
-            
+
             if (treeNodeCollection == null) return countchecked;
 
             foreach (TreeNode node in treeNodeCollection)
@@ -319,6 +331,8 @@ namespace RCRunner
         {
             ResetTestExecution();
 
+            _rcRunner.SetTestRunner(_testFrameworkRunner);
+
             DisableOrEnableControls(false);
 
             prgrsbrTestProgress.Maximum = TreeviewCountCheckedNodes(trvTestCases.Nodes);
@@ -327,16 +341,7 @@ namespace RCRunner
 
             foreach (TreeNode node in trvTestCases.Nodes)
             {
-                foreach (TreeNode child in node.Nodes)
-                {
-                    if (!child.Checked) continue;
-                    if (!(child.Tag is TestMethod)) continue;
-
-                    var testMethod = child.Tag as TestMethod;
-
-                    testCasesList.Add(testMethod);
-
-                }
+                testCasesList.AddRange(from TreeNode child in node.Nodes where child.Checked where child.Tag is TestMethod select child.Tag as TestMethod);
             }
 
             if (testCasesList.Any())
@@ -349,7 +354,7 @@ namespace RCRunner
             {
                 DisableOrEnableControls(true);
             }
-            
+
         }
 
         private void lblCancel_Click(object sender, EventArgs e)
@@ -372,6 +377,37 @@ namespace RCRunner
             }
         }
 
+        private void cmbxFilter_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            IEnumerable<TestMethod> testClassesList;
+            switch (cmbxFilter.SelectedIndex)
+            {
+                case 1:
+                    testClassesList = _rcRunner.TestClassesList.Where(x => x.TestExecutionStatus == TestExecutionStatus.Running);
+                    break;
+
+                case 2:
+                    testClassesList = _rcRunner.TestClassesList.Where(x => x.TestExecutionStatus == TestExecutionStatus.Waiting);
+                    break;
+
+                case 3:
+                    testClassesList = _rcRunner.TestClassesList.Where(x => x.TestExecutionStatus == TestExecutionStatus.Failed);
+                    break;
+
+                case 4:
+                    testClassesList = _rcRunner.TestClassesList.Where(x => x.TestExecutionStatus == TestExecutionStatus.Passed);
+                    break;
+
+                case 5:
+                    testClassesList = _rcRunner.TestClassesList.Where(x => x.TestExecutionStatus == TestExecutionStatus.Active);
+                    break;
+
+                default:
+                    testClassesList = _rcRunner.TestClassesList;
+                    break;
+            }
+            LoadTreeView(testClassesList);
+        }
     }
 
 }

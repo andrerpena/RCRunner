@@ -12,16 +12,23 @@ namespace RCRunner
 
         public event TestMethodEventHandler MethodStatusChanged;
 
-        private readonly ITestFrameworkRunner _testFrameworkRunner;
+        private ITestFrameworkRunner _testFrameworkRunner;
 
         public event CheckCanceled Canceled;
 
         private int _totRunningScripts;
 
+        private readonly PluginLoader _pluginLoader;
+
         protected virtual bool OnCanceled()
         {
             var handler = Canceled;
             return handler != null && handler();
+        }
+
+        public void SetTestRunner(ITestFrameworkRunner testFrameworkRunner)
+        {
+            _testFrameworkRunner = testFrameworkRunner;
         }
 
         protected virtual void OnMethodStatusChanged(TestMethod testcasemethod)
@@ -36,15 +43,16 @@ namespace RCRunner
             if (handler != null) handler(testcasemethod);
         }
 
-        public TestCasesThreadRunner(ITestFrameworkRunner testFrameworkRunner)
-        {
-            _testFrameworkRunner = testFrameworkRunner;
-        }
-
         private void OnTaskFinishedEvent(TestMethod testcaseMethod)
         {
             _totRunningScripts--;
             OnFinished(testcaseMethod);
+        }
+
+        public TestCasesThreadRunner()
+        {
+            _pluginLoader = new PluginLoader();
+            _pluginLoader.LoadTestExecutionPlugins();
         }
 
         private void DoWorkCore()
@@ -69,7 +77,7 @@ namespace RCRunner
                 if (OnCanceled()) return;
                 testMethod.TestExecutionStatus = TestExecutionStatus.Running;
                 OnMethodStatusChanged(testMethod);
-                var task = new TestCaseTaskThread(testMethod, _testFrameworkRunner);
+                var task = new TestCaseTaskThread(testMethod, _testFrameworkRunner, _pluginLoader);
                 task.Finished += OnTaskFinishedEvent;
                 task.DoWork();
             }

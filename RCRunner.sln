@@ -5,6 +5,10 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RCRunner", "RCRunner\RCRunner.csproj", "{711C58B0-09A5-4D67-9413-D5BF58EC4A9D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSTestWrapper", "MSTestWrapper\MSTestWrapper.csproj", "{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExecution", "TestExecution\TestExecution.csproj", "{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +23,18 @@ Global
 		{711C58B0-09A5-4D67-9413-D5BF58EC4A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{711C58B0-09A5-4D67-9413-D5BF58EC4A9D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{711C58B0-09A5-4D67-9413-D5BF58EC4A9D}.Release|x86.ActiveCfg = Release|Any CPU
+		{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E1ACEF6-C2E0-481F-8E6E-02AF1EA744A6}.Release|x86.ActiveCfg = Release|Any CPU
+		{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BF7D3FF-DAB5-4FB9-8904-89D0C42C3ECB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

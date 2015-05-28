@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RCRunner
 {
@@ -37,7 +36,7 @@ namespace RCRunner
 
         public event TestMethodEventHandler MethodStatusChanged;
 
-        private readonly ITestFrameworkRunner _testFrameworkRunner;
+        private ITestFrameworkRunner _testFrameworkRunner;
 
         private bool _canceled;
 
@@ -68,15 +67,20 @@ namespace RCRunner
             StatusChanged(testcasemethod);
         }
 
-        public RCRunnerAPI(ITestFrameworkRunner testFrameworkRunner)
+        public RCRunnerAPI()
         {
-            _testFrameworkRunner = testFrameworkRunner;
+            _testCasesThreadRunner = new TestCasesThreadRunner();
             TestClassesList = new List<TestMethod>();
-            _testCasesThreadRunner = new TestCasesThreadRunner(_testFrameworkRunner);
             _testCasesThreadRunner.Finished += OnTaskFinishedEvent;
             _testCasesThreadRunner.MethodStatusChanged += OnMethodStatusChanged;
             _testCasesThreadRunner.Canceled += CheckTasksCanceled;
             _canceled = false;
+        }
+
+         public void SetTestRunner(ITestFrameworkRunner testFrameworkRunner)
+        {
+            _testFrameworkRunner = testFrameworkRunner;
+            _testCasesThreadRunner.SetTestRunner(testFrameworkRunner);
         }
 
         private string GetDescriptionAttributeValue(MemberInfo methodInfo)

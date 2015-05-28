@@ -1,6 +1,6 @@
 ﻿namespace RCRunner
 {
-    partial class Form1
+    partial class FrmMain
     {
         /// <summary>
         /// Required designer variable.
@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cmbTestRunners = new System.Windows.Forms.ComboBox();
             this.lblCancel = new System.Windows.Forms.LinkLabel();
             this.lblExecuteTestScripts = new System.Windows.Forms.LinkLabel();
             this.lblLoadAssembly = new System.Windows.Forms.LinkLabel();
@@ -47,6 +49,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.txtbxTestDescription = new System.Windows.Forms.TextBox();
             this.panel5 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cmbxFilter = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.trvTestCases = new System.Windows.Forms.TreeView();
             this.panel1.SuspendLayout();
@@ -62,14 +66,37 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(28)))), ((int)(((byte)(28)))));
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.label4);
+            this.panel1.Controls.Add(this.cmbTestRunners);
             this.panel1.Controls.Add(this.lblCancel);
             this.panel1.Controls.Add(this.lblExecuteTestScripts);
             this.panel1.Controls.Add(this.lblLoadAssembly);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1055, 39);
+            this.panel1.Size = new System.Drawing.Size(1055, 47);
             this.panel1.TabIndex = 2;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.Color.White;
+            this.label4.Location = new System.Drawing.Point(13, 11);
+            this.label4.Name = "label4";
+            this.label4.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
+            this.label4.Size = new System.Drawing.Size(91, 20);
+            this.label4.TabIndex = 8;
+            this.label4.Text = "Test framework";
+            // 
+            // cmbTestRunners
+            // 
+            this.cmbTestRunners.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTestRunners.FormattingEnabled = true;
+            this.cmbTestRunners.Location = new System.Drawing.Point(110, 14);
+            this.cmbTestRunners.Name = "cmbTestRunners";
+            this.cmbTestRunners.Size = new System.Drawing.Size(301, 21);
+            this.cmbTestRunners.TabIndex = 7;
             // 
             // lblCancel
             // 
@@ -77,7 +104,7 @@
             this.lblCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCancel.ForeColor = System.Drawing.Color.White;
             this.lblCancel.LinkColor = System.Drawing.Color.White;
-            this.lblCancel.Location = new System.Drawing.Point(315, 10);
+            this.lblCancel.Location = new System.Drawing.Point(708, 14);
             this.lblCancel.Name = "lblCancel";
             this.lblCancel.Size = new System.Drawing.Size(116, 17);
             this.lblCancel.TabIndex = 5;
@@ -91,7 +118,7 @@
             this.lblExecuteTestScripts.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblExecuteTestScripts.ForeColor = System.Drawing.Color.White;
             this.lblExecuteTestScripts.LinkColor = System.Drawing.Color.White;
-            this.lblExecuteTestScripts.Location = new System.Drawing.Point(154, 10);
+            this.lblExecuteTestScripts.Location = new System.Drawing.Point(552, 14);
             this.lblExecuteTestScripts.Name = "lblExecuteTestScripts";
             this.lblExecuteTestScripts.Size = new System.Drawing.Size(137, 17);
             this.lblExecuteTestScripts.TabIndex = 4;
@@ -105,7 +132,7 @@
             this.lblLoadAssembly.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblLoadAssembly.ForeColor = System.Drawing.Color.White;
             this.lblLoadAssembly.LinkColor = System.Drawing.Color.White;
-            this.lblLoadAssembly.Location = new System.Drawing.Point(33, 10);
+            this.lblLoadAssembly.Location = new System.Drawing.Point(426, 14);
             this.lblLoadAssembly.Name = "lblLoadAssembly";
             this.lblLoadAssembly.Size = new System.Drawing.Size(104, 17);
             this.lblLoadAssembly.TabIndex = 3;
@@ -123,7 +150,7 @@
             this.panel4.Controls.Add(this.lblRunningScripts);
             this.panel4.Controls.Add(this.prgrsbrTestProgress);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel4.Location = new System.Drawing.Point(0, 39);
+            this.panel4.Location = new System.Drawing.Point(0, 47);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(1055, 72);
             this.panel4.TabIndex = 10;
@@ -188,9 +215,9 @@
             this.panel2.Controls.Add(this.panel3);
             this.panel2.Controls.Add(this.panel5);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 111);
+            this.panel2.Location = new System.Drawing.Point(0, 119);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1055, 495);
+            this.panel2.Size = new System.Drawing.Size(1055, 487);
             this.panel2.TabIndex = 11;
             // 
             // panel3
@@ -200,7 +227,7 @@
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(319, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(736, 495);
+            this.panel3.Size = new System.Drawing.Size(736, 487);
             this.panel3.TabIndex = 11;
             // 
             // panel7
@@ -211,7 +238,7 @@
             this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel7.Location = new System.Drawing.Point(0, 111);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(736, 384);
+            this.panel7.Size = new System.Drawing.Size(736, 376);
             this.panel7.TabIndex = 17;
             // 
             // txtbxTestError
@@ -226,7 +253,7 @@
             this.txtbxTestError.Multiline = true;
             this.txtbxTestError.Name = "txtbxTestError";
             this.txtbxTestError.ReadOnly = true;
-            this.txtbxTestError.Size = new System.Drawing.Size(719, 346);
+            this.txtbxTestError.Size = new System.Drawing.Size(719, 338);
             this.txtbxTestError.TabIndex = 17;
             // 
             // lblTestStatus
@@ -280,13 +307,44 @@
             // panel5
             // 
             this.panel5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(42)))), ((int)(((byte)(44)))));
+            this.panel5.Controls.Add(this.label1);
+            this.panel5.Controls.Add(this.cmbxFilter);
             this.panel5.Controls.Add(this.label3);
             this.panel5.Controls.Add(this.trvTestCases);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel5.Location = new System.Drawing.Point(0, 0);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(319, 495);
+            this.panel5.Size = new System.Drawing.Size(319, 487);
             this.panel5.TabIndex = 10;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.Location = new System.Drawing.Point(9, 27);
+            this.label1.Name = "label1";
+            this.label1.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
+            this.label1.Size = new System.Drawing.Size(34, 20);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Filter";
+            // 
+            // cmbxFilter
+            // 
+            this.cmbxFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbxFilter.FormattingEnabled = true;
+            this.cmbxFilter.Items.AddRange(new object[] {
+            "Everything",
+            "Running Scripts",
+            "Wating Scripts",
+            "Failed Scripts",
+            "Passed Scripts",
+            "Active Scripts"});
+            this.cmbxFilter.Location = new System.Drawing.Point(49, 30);
+            this.cmbxFilter.Name = "cmbxFilter";
+            this.cmbxFilter.Size = new System.Drawing.Size(261, 21);
+            this.cmbxFilter.TabIndex = 8;
+            this.cmbxFilter.SelectionChangeCommitted += new System.EventHandler(this.cmbxFilter_SelectionChangeCommitted);
             // 
             // label3
             // 
@@ -307,14 +365,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.trvTestCases.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(42)))), ((int)(((byte)(44)))));
             this.trvTestCases.ForeColor = System.Drawing.Color.White;
-            this.trvTestCases.Location = new System.Drawing.Point(12, 25);
+            this.trvTestCases.Location = new System.Drawing.Point(12, 59);
             this.trvTestCases.Name = "trvTestCases";
-            this.trvTestCases.Size = new System.Drawing.Size(298, 458);
+            this.trvTestCases.Size = new System.Drawing.Size(298, 416);
             this.trvTestCases.TabIndex = 2;
             this.trvTestCases.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.trvTestCases_AfterCheck);
             this.trvTestCases.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trvTestCases_AfterSelect);
             // 
-            // Form1
+            // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -322,7 +380,7 @@
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel1);
-            this.Name = "Form1";
+            this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "RC Runner";
             this.panel1.ResumeLayout(false);
@@ -364,6 +422,10 @@
         private System.Windows.Forms.Label lblFailedScripts;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.LinkLabel lblCancel;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox cmbxFilter;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cmbTestRunners;
 
     }
 }

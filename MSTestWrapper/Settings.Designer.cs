@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RCRunner.Properties {
+namespace MSTestWrapper {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,13 +25,13 @@ namespace RCRunner.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("6")]
-        public int MaxThreads {
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE\\MSTest.exe")]
+        public string MSTestExeLocation {
             get {
-                return ((int)(this["MaxThreads"]));
+                return ((string)(this["MSTestExeLocation"]));
             }
             set {
-                this["MaxThreads"] = value;
+                this["MSTestExeLocation"] = value;
             }
         }
     }

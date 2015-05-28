@@ -11,7 +11,7 @@ namespace RCRunner
     {
         private readonly TestMethod _testCase;
         private readonly ITestFrameworkRunner _testFrameworkRunner;
-
+        private readonly PluginLoader _pluginLoader;
         public event TestMethodEventHandler Finished;
 
         protected virtual void OnFinished(Exception exception)
@@ -32,10 +32,19 @@ namespace RCRunner
             if (handler != null) handler(_testCase);
         }
 
-        public TestCaseTaskThread(TestMethod testCase, ITestFrameworkRunner testFrameworkRunner)
+        public TestCaseTaskThread(TestMethod testCase, ITestFrameworkRunner testFrameworkRunner, PluginLoader pluginLoader)
         {
             _testCase = testCase;
             _testFrameworkRunner = testFrameworkRunner;
+            _pluginLoader = pluginLoader;
+        }
+
+        private void RunTestExecutionPlugins(string testCase)
+        {
+            foreach (var testExecution in _pluginLoader.TestExecutionPlugiList)
+            {
+                testExecution.AfterTestExecution(testCase);
+            }
         }
 
         public void DoWork()
@@ -49,9 +58,15 @@ namespace RCRunner
         {
             try
             {
-                _testFrameworkRunner.RunTest(_testCase.DisplayName);
-                OnFinished(null);
-
+                try
+                {
+                    _testFrameworkRunner.RunTest(_testCase.DisplayName);
+                    OnFinished(null);
+                }
+                finally
+                {
+                    RunTestExecutionPlugins(_testCase.DisplayName);
+                }
             }
             catch (Exception exception)
             {
